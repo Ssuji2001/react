@@ -1,0 +1,15 @@
+.order-success-container {
+    text-align: center;
+    margin-top: 50px;
+}
+
+.tick-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.tick-image {
+    width: 100px;
+    height: 100px;
+}
