@@ -59,14 +59,15 @@ const upload = multer({storage:storage})
 
 //Creating Upload Endpoint for Images
 
-app.use('/images',express.static('upload/images'))
+app.use('/images', express.static(path.join(__dirname, 'upload/images')));
 
-app.post("/upload",upload.single('product'),(req,res)=>{
+app.post("/upload", upload.single('product'), (req, res) => {
+    const imageUrl = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
     res.json({
-        success:1,
-        image_url:`https://react-git-main-sujis-projects-d50eb3dd.vercel.app/images/${req.file.filename}`
-    })
-})
+        success: 1,
+        image_url: imageUrl
+    });
+});
 
 //Schema for Creating Products
 
