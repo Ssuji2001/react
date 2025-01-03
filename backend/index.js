@@ -11,17 +11,30 @@ const cors = require("cors");
 app.use(express.json());
 app.use(cors());
 
-//Datebas Connection with MongoDB
+
 const dotenv = require("dotenv");
-dotenv.config(); // Ensure this line is added before using process.env
-mongoose.connect(process.env.MONGO_URL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-}).then(() => {
-    console.log("Connected to MongoDB successfully!");
-}).catch((error) => {
-    console.error("Error connecting to MongoDB:", error);
-});
+
+// Load environment variables
+dotenv.config(); // Ensure .env is in the root directory
+
+// Debug log for MONGO_URI
+console.log("MONGO_URI:", process.env.MONGO_URI);
+
+const connectDB = async () => {
+    try {
+        await mongoose.connect(process.env.MONGO_URI, {
+            useUnifiedTopology: true,
+        });
+        console.log("Connected to MongoDB successfully!");
+    } catch (error) {
+        console.error("Error connecting to MongoDB:", error.message);
+        process.exit(1); // Exit process with failure
+    }
+};
+
+// Connect to the database
+connectDB();
+
 
 //API creation
 
@@ -34,7 +47,7 @@ app.get("/",(req,res)=>{
 const storage = multer.diskStorage({
     destination:'./upload/images',
     filename:(req,file,cb)=>{
-        return cb(null,`${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`)
+        return cb(null,$`{file.fieldname}_${Date.now()}${path.extname(file.originalname)}`)
     }
 })
 
@@ -47,7 +60,7 @@ app.use('/images',express.static('upload/images'))
 app.post("/upload",upload.single('product'),(req,res)=>{
     res.json({
         success:1,
-        image_url:'http://localhost:${port}/images/${req.file.filename}'
+        image_url:`http://localhost:${port}/images/${req.file.filename}`
     })
 })
 
@@ -279,5 +292,5 @@ app.listen(port,(error)=>{
     }
     else{
         console.log("Error : "+error)
-    }
+    }
 })
