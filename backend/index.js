@@ -9,7 +9,11 @@ const cors = require("cors");
 
 
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: "*",
+      methods:["POST","GET"],
+      credentials:true
+  }))
 
 
 const dotenv = require("dotenv");
@@ -47,7 +51,7 @@ app.get("/",(req,res)=>{
 const storage = multer.diskStorage({
     destination:'./upload/images',
     filename:(req,file,cb)=>{
-        return cb(null,$`{file.fieldname}_${Date.now()}${path.extname(file.originalname)}`)
+        return cb(null,`${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`)
     }
 })
 
