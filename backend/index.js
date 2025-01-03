@@ -10,7 +10,7 @@ const cors = require("cors");
 
 app.use(express.json());
 app.use(cors({
-    origin: "https://react-git-main-sujis-projects-d50eb3dd.vercel.app",
+    origin: "*",
       methods:["POST","GET"],
       credentials:true
   }))
