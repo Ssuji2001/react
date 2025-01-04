@@ -10,7 +10,7 @@ const cors = require("cors");
 
 app.use(express.json());
 app.use(cors({
-    origin: "*",
+    origin: ['http://localhost:3000'],
       methods:["POST","GET"],
       credentials:true
   }))
@@ -67,6 +67,7 @@ app.post('/upload', upload.single('product'), (req, res) => {
         image_url: imageUrl, // Absolute URL
     });
 });
+
 
 //Schema for Creating Products
 
