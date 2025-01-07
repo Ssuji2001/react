@@ -101,7 +101,7 @@ app.post("/removeproduct", async (req, res) => {
 });
 
 // Base URL for Images
-const BASE_URL = "https://react-chi-ashy.vercel.app/"; // Replace with your actual URL
+const BASE_URL = "https://your-app-name.onrender.com"; // Replace with your actual URL
 
 
 // Get All Products
