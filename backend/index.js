@@ -101,7 +101,8 @@ app.post("/removeproduct", async (req, res) => {
 });
 
 // Base URL for Images
-const BASE_URL = "https://yourdomain.com"; // Replace with your actual domain
+const BASE_URL = `${req.protocol}://${req.get("host")}`;
+
 
 // Get All Products
 app.get("/allproducts", async (req, res) => {
