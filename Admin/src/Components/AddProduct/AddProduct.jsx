@@ -42,7 +42,7 @@ const AddProduct = () => {
         {
             product.image = responseData.image_url;
             console.log(product);
-            await fetch("https://react-zfr1.onrender.com/addproduct",{
+            await fetch("    /addproduct",{
                 method:'POST',
                 headers:{
                     Accept:'application/json',

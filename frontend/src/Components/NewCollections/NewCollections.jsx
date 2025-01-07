@@ -9,7 +9,7 @@ const NewCollections = () => {
   const [new_collection,setNew_collection] = useState([]);
 
   useEffect(()=>{
-      fetch('http://localhost:3000/newcollections')
+      fetch('https://react-zfr1.onrender.com/newcollections')
       .then((response)=>response.json())
       .then((data)=>setNew_collection(data))
   },[])
