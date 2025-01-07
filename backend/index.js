@@ -101,23 +101,16 @@ app.post("/removeproduct", async (req, res) => {
 });
 
 // Base URL for Images
-const BASE_URL = "https://your-app-name.onrender.com"; // Replace with your actual URL
-
+const BASE_URL = "https://yourdomain.com"; // Replace with your actual domain
 
 // Get All Products
 app.get("/allproducts", async (req, res) => {
-  try {
-    let products = await Product.find({});
-    products = products.map((product) => ({
-      ...product.toObject(),
-      image: product.image.startsWith("http")
-        ? product.image.replace("http://", "https://")
-        : `${BASE_URL}${product.image}`,
-    }));
-    res.json(products);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to fetch products" });
-  }
+  let products = await Product.find({});
+  products = products.map((product) => ({
+    ...product.toObject(),
+    image: product.image.startsWith("http") ? product.image : `${BASE_URL}${product.image}`,
+  }));
+  res.json(products);
 });
 
 // The rest of your code for Users and other endpoints remains unchanged...
