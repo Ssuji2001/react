@@ -101,7 +101,7 @@ app.post("/removeproduct", async (req, res) => {
 });
 
 // Base URL for Images
-const BASE_URL = `${req.protocol}://${req.get("host")}`;
+const BASE_URL = "https://react-chi-ashy.vercel.app/"; // Replace with your actual URL
 
 
 // Get All Products
