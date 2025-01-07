@@ -108,7 +108,7 @@ app.get("/allproducts", async (req, res) => {
   let products = await Product.find({});
   products = products.map((product) => ({
     ...product.toObject(),
-    image: product.image.startsWith("https") ? product.image : `${BASE_URL}${product.image}`,
+    image: product.image.startsWith("http") ? product.image : `${BASE_URL}${product.image}`,
   }));
   res.json(products);
 });
