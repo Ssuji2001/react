@@ -10,8 +10,13 @@ const cors = require("cors");
 app.use(express.json());
 
 // Replace with your frontend URL
-app.use(cors({ origin: "*", methods: ["POST", "GET", "OPTIONS"], credentials: true }));
-
+app.use(
+  cors({
+    origin: "*",
+    methods: ["POST", "GET"],
+    credentials: true,
+  })
+);
 
 // Database Connection with MongoDB
 const dotenv = require("dotenv");
