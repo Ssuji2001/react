@@ -12,7 +12,7 @@ app.use(express.json());
 // Replace with your frontend URL
 app.use(
   cors({
-    origin: "https://react-chi-ashy.vercel.app",
+    origin: "*",
     methods: ["POST", "GET"],
     credentials: true,
   })
@@ -46,7 +46,7 @@ app.get("/", (req, res) => {
 const storage = multer.diskStorage({
   destination: "./upload/images",
   filename: (req, file, cb) => {
-    return cb(null, $`{file.fieldname}_${Date.now()}${path.extname(file.originalname)}`);
+    return cb(null, `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`);
   },
 });
 
@@ -56,23 +56,12 @@ const upload = multer({ storage: storage });
 app.use("/images", express.static(path.join("upload/images")));
 
 // Upload Endpoint for Images
-app.post('/upload', upload.single('product'), (req, res) => {
-    // Check if a file was uploaded
-    if (!req.file) {
-        return res.status(400).json({
-            success: 0,
-            message: 'No file uploaded. Please upload an image.',
-        });
-    }
-
-    // Construct the absolute URL of the uploaded image
-    const imageUrl = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
-
-    // Respond with the image URL
-    res.json({
-        success: 1,
-        image_url: imageUrl,
-    });
+app.post("/upload", upload.single("product"), (req, res) => {
+  const imageUrl = `${req.protocol}://${req.get("host")}/images/${req.file.filename}`;
+  res.json({
+    success: 1,
+    image_url: imageUrl,
+  });
 });
 
 // Product Schema
@@ -116,10 +105,11 @@ const BASE_URL = "https://yourdomain.com"; // Replace with your actual domain
 
 // Get All Products
 app.get("/allproducts", async (req, res) => {
+ 
   let products = await Product.find({});
   products = products.map((product) => ({
     ...product.toObject(),
-    image: product.image.startsWith("http") ? product.image : $`{BASE_URL}${product.image}`,
+    image: product.image.startsWith("http") ? product.image : `${BASE_URL}${product.image}`,
   }));
   res.json(products);
 });
@@ -131,5 +121,5 @@ app.listen(port, (error) => {
     console.log("Server Running on Port " + port);
   } else {
     console.log("Error : " + error);
-  }
-});
+  }}
+);
