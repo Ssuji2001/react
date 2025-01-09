@@ -40,7 +40,7 @@ const Placeorder = () => {
             return;
         }
 
-        const response = await fetch('http://localhost:3001/create-payment-intent', {
+        const response = await fetch('https://react-zfr1.onrender.com/create-payment-intent', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ amount: getTotalCartAmount() * 100 }), // Amount in cents

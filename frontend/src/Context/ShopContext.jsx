@@ -17,13 +17,13 @@ const ShopContextProvider = (props) => {
 
     // Fetch products and cart data on component mount
     useEffect(() => {
-        fetch('http://localhost:3000/allproducts')
+        fetch('https://react-zfr1.onrender.com/allproducts')
             .then((response) => response.json())
             .then((data) => setAll_Product(data));
 
         // Fetch cart data only if user is authenticated
         if (localStorage.getItem('auth-token')) {
-            fetch('http://localhost:3000/getcart', {
+            fetch('https://react-zfr1.onrender.com/getcart', {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',  // Fixed typo here
@@ -43,7 +43,7 @@ const ShopContextProvider = (props) => {
         setCartItems((prev) => ({ ...prev, [itemId]: (prev[itemId] || 0) + 1 }));
 
         if (localStorage.getItem('auth-token')) {
-            fetch('http://localhost:3000/addtocart', {
+            fetch('https://react-zfr1.onrender.com/addtocart', {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',
@@ -65,7 +65,7 @@ const ShopContextProvider = (props) => {
         setCartItems((prev) => ({ ...prev, [itemId]: (prev[itemId] || 0) - 1 }));
 
         if (localStorage.getItem('auth-token')) {
-            fetch('http://localhost:3000/removefromcart', {
+            fetch('https://react-zfr1.onrender.com/removefromcart', {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',
@@ -85,7 +85,7 @@ const ShopContextProvider = (props) => {
         setCartItems((prev) => ({ ...prev, [itemId]: (prev[itemId] || 0) - 1 }));
 
         if (localStorage.getItem('auth-token')) {
-            fetch('http://localhost:3000/removefromcart', {
+            fetch('https://react-zfr1.onrender.com/removefromcart', {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',
