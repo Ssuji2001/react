@@ -113,6 +113,16 @@ app.get("/allproducts", async (req, res) => {
   }));
   res.json(products);
 });
+app.post('/login', (req, res) => {
+  const { username, password } = req.body;
+
+  // Validate credentials
+  if (username === 'test' && password === '1234') {
+      return res.status(200).send({ message: 'Login successful' });
+  }
+
+  return res.status(401).send({ message: 'Invalid credentials' });
+});
 
 // The rest of your code for Users and other endpoints remains unchanged...
 
