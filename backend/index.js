@@ -113,47 +113,7 @@ app.get("/allproducts", async (req, res) => {
   }));
   res.json(products);
 });
-app.post('/create-payment-intent', (req, res) => {
-  try {
-      // Your payment intent logic here
-      res.json({ success: true });
-  } catch (error) {
-      console.error('Error in /create-payment-intent:', error);
-      res.status(500).json({ message: 'Failed to create payment intent' });
-  }
-});
 
-// Login route
-app.post('/login', (req, res) => {
-  const { username, password } = req.body;
-
-  if (!username || !password) {
-      return res.status(400).json({ message: 'Username and password are required' });
-  }
-
-  // Dummy login logic (replace with actual validation logic)
-  if (username === 'testuser' && password === 'password123') {
-      res.json({ token: 'your-jwt-token' }); // Return a fake token
-  } else {
-      res.status(401).json({ message: 'Invalid username or password' });
-  }
-});
-
-// Signup route
-app.post('/signup', (req, res) => {
-  const { username, password } = req.body;
-
-  if (!username || !password) {
-      return res.status(400).json({ message: 'Username and password are required' });
-  }
-
-  // Handle signup logic here (e.g., save user to database)
-  console.log('New user signup:', { username, password });
-
-  res.json({ message: "Signup successful!" });
-});
-
-// The rest of your code for Users and other endpoints remains unchanged...
 
 app.listen(port, (error) => {
   if (!error) {
