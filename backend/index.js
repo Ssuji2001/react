@@ -127,7 +127,8 @@ app.post('/login', (req, res) => {
 app.post('/signup', (req, res) => {
   const { username, password } = req.body;
   // Handle signup logic here
-  res.send('Signup successful!');
+  res.json({ message: "Signup successful!" });
+
 });
 
 
