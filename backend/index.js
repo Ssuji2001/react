@@ -124,6 +124,12 @@ app.post('/login', (req, res) => {
   res.json({ token: 'your-jwt-token' });
 });
 
+app.post('/signup', (req, res) => {
+  const { username, password } = req.body;
+  // Handle signup logic here
+  res.send('Signup successful!');
+});
+
 
 // The rest of your code for Users and other endpoints remains unchanged...
 
