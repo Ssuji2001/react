@@ -113,6 +113,17 @@ app.get("/allproducts", async (req, res) => {
   }));
   res.json(products);
 });
+app.post('/signup', (req, res) => {
+  const { username, email, password } = req.body;
+
+  if (!username || !email || !password) {
+      return res.status(400).json({ success: false, message: 'All fields are required' });
+  }
+
+  // Simulate saving to a database (example)
+  console.log('User registered:', { username, email, password });
+  res.json({ success: true, message: 'Signup successful!' });
+});
 
 
 app.listen(port, (error) => {
