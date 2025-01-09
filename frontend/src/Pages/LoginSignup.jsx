@@ -15,7 +15,7 @@ const LoginSignup = () => {
   const login = async () =>{
     console.log("Login Function Executed",formData);
     let responseData;
-    await fetch('https://react-zfr1.onrender.com/login',{
+    await fetch('http://localhost:3000/login',{
       method:'POST',
       headers:{
         Accept:'application/form-data',
@@ -36,7 +36,7 @@ const LoginSignup = () => {
   const signup = async () =>{
     console.log("Signup Function Executed",formData);
     let responseData;
-    await fetch('https://react-zfr1.onrender.com/signup',{
+    await fetch('http://localhost:3000/signup',{
       method:'POST',
       headers:{
         Accept:'application/form-data',
