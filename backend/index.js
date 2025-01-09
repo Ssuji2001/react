@@ -114,6 +114,16 @@ app.get("/allproducts", async (req, res) => {
   res.json(products);
 });
 
+app.post('/create-payment-intent', (req, res) => {
+  // Your logic here
+  res.json({ success: true });
+});
+
+app.post('/login', (req, res) => {
+  // Your login logic here
+  res.json({ token: 'your-jwt-token' });
+});
+
 
 // The rest of your code for Users and other endpoints remains unchanged...
 
