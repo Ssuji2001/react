@@ -1,4 +1,4 @@
-const port = 4000;
+const port =3000;
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
@@ -113,6 +113,29 @@ app.get("/allproducts", async (req, res) => {
   }));
   res.json(products);
 });
+app.post('/login', (req, res) => {
+  const { email, password } = req.body;
+
+  // Validate input
+  if (!email || !password) {
+    return res.status(400).json({ success: false, message: 'Email and password are required' });
+  }
+
+  // Dummy user data for testing (replace this with your database logic)
+  const user = {
+    email: 'test@example.com',
+    password: 'password123', // In production, never store plain-text passwords
+  };
+
+  if (email === user.email && password === user.password) {
+    // Generate a token for the user (using JWT, for example)
+    const token = jwt.sign({ email }, 'your_jwt_secret', { expiresIn: '1h' });
+    res.json({ success: true, message: 'Login successful!', token });
+  } else {
+    res.status(401).json({ success: false, message: 'Invalid credentials' });
+  }
+});
+
 app.post('/signup', (req, res) => {
   const { username, email, password } = req.body;
 
