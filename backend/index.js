@@ -121,30 +121,33 @@ app.post('/login', (req, res) => {
     return res.status(400).json({ success: false, message: 'Email and password are required' });
   }
 
-  // Dummy user data for testing (replace this with your database logic)
-  const user = {
-    email: 'test@example.com',
-    password: 'password123', // In production, never store plain-text passwords
-  };
-
-  if (email === user.email && password === user.password) {
-    // Generate a token for the user (using JWT, for example)
+  // Check if the user exists
+  const user = users.find((u) => u.email === email && u.password === password);
+  if (user) {
+    // Generate a JWT token
     const token = jwt.sign({ email }, 'your_jwt_secret', { expiresIn: '1h' });
-    res.json({ success: true, message: 'Login successful!', token });
+    return res.json({ success: true, message: 'Login successful!', token });
   } else {
-    res.status(401).json({ success: false, message: 'Invalid credentials' });
+    return res.status(401).json({ success: false, message: 'Invalid credentials' });
   }
 });
+const users = []; // Use a database in production
 
 app.post('/signup', (req, res) => {
   const { username, email, password } = req.body;
 
   if (!username || !email || !password) {
-      return res.status(400).json({ success: false, message: 'All fields are required' });
+    return res.status(400).json({ success: false, message: 'All fields are required' });
   }
 
-  // Simulate saving to a database (example)
-  console.log('User registered:', { username, email, password });
+  // Check if the email is already registered
+  if (users.find((u) => u.email === email)) {
+    return res.status(400).json({ success: false, message: 'Email is already registered' });
+  }
+
+  // Add the user to the database
+  users.push({ username, email, password });
+  console.log('User registered:', { username, email });
   res.json({ success: true, message: 'Signup successful!' });
 });
 

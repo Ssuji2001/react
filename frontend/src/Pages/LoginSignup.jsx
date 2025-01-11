@@ -12,62 +12,62 @@ const LoginSignup = () => {
   const changeHandler = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-
   const login = async () => {
+    if (!formData.email || !formData.password) {
+      alert('Please enter both email and password.');
+      return;
+    }
+  
     try {
-      console.log("Login Function Executed", formData);
-      const response = await fetch("http://localhost:3000/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
+      const response = await fetch('http://localhost:3000/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email, password: formData.password }),
       });
-
+  
       if (!response.ok) {
-        throw new Error("Failed to login. Please check your credentials.");
+        const errorResponse = await response.json();
+        throw new Error(errorResponse.message || 'Failed to login. Please try again.');
       }
-
-      const responseData = await response.json();
-
-      if (responseData.success) {
-        localStorage.setItem("auth-token", responseData.token);
-        window.location.replace("/");
-      } else {
-        alert(responseData.errors || "An error occurred during login.");
-      }
+  
+      const data = await response.json();
+      localStorage.setItem('auth-token', data.token);
+      alert('Login successful!');
+      window.location.replace('/');
     } catch (error) {
       alert(error.message);
     }
   };
+  
 
   const signup = async () => {
+    if (!formData.username || !formData.email || !formData.password) {
+      alert('All fields are required.');
+      return;
+    }
+  
     try {
-      console.log("Signup Function Executed", formData);
-      const response = await fetch("http://localhost:3000/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
+      const response = await fetch('http://localhost:3000/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: formData.username,
+          email: formData.email,
+          password: formData.password,
+        }),
       });
-
+  
       if (!response.ok) {
-        throw new Error("Failed to sign up. Please try again.");
+        const errorResponse = await response.json();
+        throw new Error(errorResponse.message || 'Signup failed.');
       }
-
-      const responseData = await response.json();
-
-      if (responseData.success) {
-        localStorage.setItem("auth-token", responseData.token);
-        window.location.replace("/");
-      } else {
-        alert(responseData.errors || "An error occurred during signup.");
-      }
+  
+      alert('Signup successful! You can now log in.');
     } catch (error) {
       alert(error.message);
     }
   };
+  
 
   return (
     <div className="loginsignup">
