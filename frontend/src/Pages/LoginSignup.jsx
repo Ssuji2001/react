@@ -13,6 +13,11 @@ const LoginSignup = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
   const login = async () => {
+    const users = [
+      { email: 'userproject20@gmail.com', password: '12345678' },
+      { email: 'test@example.com', password: 'password123' },
+    ];
+    
     if (!formData.email || !formData.password) {
       alert('Please enter both email and password.');
       return;
