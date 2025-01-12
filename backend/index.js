@@ -43,8 +43,8 @@ const User = mongoose.model("User", {
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   cartData: {
-    type: Number, // Change the type to Number
-    default: 300, // Default value set to 300
+    type: Object, // Change the type to Number
+     
   },
   date: { type: Date, default: Date.now }, // Automatically store the creation date
 });
@@ -150,6 +150,10 @@ app.post("/signup", async (req, res) => {
     res.status(500).json({ success: false, message: "Signup failed.", error });
   }
 });
+let cart = {};
+for (let i = 0; i < 300; i++) {
+  cart[i] = 0;
+}
 
 // Login Endpoint
 app.post("/login", async (req, res) => {
