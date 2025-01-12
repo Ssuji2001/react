@@ -1,4 +1,4 @@
-const port =4000;
+const port = 4000;
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
@@ -38,6 +38,29 @@ const connectDB = async () => {
 
 connectDB();
 
+const User = mongoose.model("User", {
+  username: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  cartData: {
+    type: Number, // Change the type to Number
+    default: 300, // Default value set to 300
+  },
+  date: { type: Date, default: Date.now }, // Automatically store the creation date
+});
+
+// Product Schema and Model
+const Product = mongoose.model("Product", {
+  id: { type: Number, required: true },
+  name: { type: String, required: true },
+  image: { type: String, required: true },
+  category: { type: String, required: true },
+  new_price: { type: Number, required: true },
+  old_price: { type: Number, required: true },
+  date: { type: Date, default: Date.now },
+  available: { type: Boolean, default: true },
+});
+
 app.get("/", (req, res) => {
   res.send("Express App is Running");
 });
@@ -46,7 +69,10 @@ app.get("/", (req, res) => {
 const storage = multer.diskStorage({
   destination: "./upload/images",
   filename: (req, file, cb) => {
-    return cb(null, `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`);
+    return cb(
+      null,
+      `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`
+    );
   },
 });
 
@@ -62,18 +88,6 @@ app.post("/upload", upload.single("product"), (req, res) => {
     success: 1,
     image_url: imageUrl,
   });
-});
-
-// Product Schema
-const Product = mongoose.model("Product", {
-  id: { type: Number, required: true },
-  name: { type: String, required: true },
-  image: { type: String, required: true },
-  category: { type: String, required: true },
-  new_price: { type: Number, required: true },
-  old_price: { type: Number, required: true },
-  date: { type: Date, default: Date.now },
-  available: { type: Boolean, default: true },
 });
 
 // Add Product
@@ -105,7 +119,6 @@ const BASE_URL = "https://yourdomain.com"; // Replace with your actual domain
 
 // Get All Products
 app.get("/allproducts", async (req, res) => {
- 
   let products = await Product.find({});
   products = products.map((product) => ({
     ...product.toObject(),
@@ -113,49 +126,58 @@ app.get("/allproducts", async (req, res) => {
   }));
   res.json(products);
 });
-app.post('/login', (req, res) => {
-  const { email, password } = req.body;
 
-  // Validate input
-  if (!email || !password) {
-    return res.status(400).json({ success: false, message: 'Email and password are required' });
-  }
-
-  // Check if the user exists
-  const user = users.find((u) => u.email === email && u.password === password);
-  if (user) {
-    // Generate a JWT token
-    const token = jwt.sign({ email }, 'your_jwt_secret', { expiresIn: '1h' });
-    return res.json({ success: true, message: 'Login successful!', token });
-  } else {
-    return res.status(401).json({ success: false, message: 'Invalid credentials' });
-  }
-});
-const users = []; // Use a database in production
-
-app.post('/signup', (req, res) => {
+// Signup Endpoint
+app.post("/signup", async (req, res) => {
   const { username, email, password } = req.body;
 
   if (!username || !email || !password) {
-    return res.status(400).json({ success: false, message: 'All fields are required' });
+    return res.status(400).json({ success: false, message: "All fields are required" });
   }
 
-  // Check if the email is already registered
-  if (users.find((u) => u.email === email)) {
-    return res.status(400).json({ success: false, message: 'Email is already registered' });
-  }
+  try {
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: "Email is already registered" });
+    }
 
-  // Add the user to the database
-  users.push({ username, email, password });
-  console.log('User registered:', { username, email });
-  res.json({ success: true, message: 'Signup successful!' });
+    const user = new User({ username, email, password });
+    await user.save();
+    console.log("User registered:", { username, email });
+    res.json({ success: true, message: "Signup successful!" });
+  } catch (error) {
+    console.error("Signup error:", error.message);
+    res.status(500).json({ success: false, message: "Signup failed.", error });
+  }
 });
 
+// Login Endpoint
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
 
+  if (!email || !password) {
+    return res.status(400).json({ success: false, message: "Email and password are required" });
+  }
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user || user.password !== password) {
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
+    }
+
+    const token = jwt.sign({ email: user.email }, "your_jwt_secret", { expiresIn: "1h" });
+    res.json({ success: true, message: "Login successful!", token });
+  } catch (error) {
+    console.error("Login error:", error.message);
+    res.status(500).json({ success: false, message: "Login failed.", error });
+  }
+});
+
+// Start the Server
 app.listen(port, (error) => {
   if (!error) {
     console.log("Server Running on Port " + port);
   } else {
     console.log("Error : " + error);
-  }}
-);
+  }
+});
