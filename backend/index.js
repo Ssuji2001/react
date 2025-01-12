@@ -184,6 +184,26 @@ app.post("/login", async (req, res) => {
     res.status(500).json({ success: false, message: "Login failed.", error });
   }
 });
+// Add to Cart Endpoint
+app.post("/addtocart", async (req, res) => {
+  const { itemId } = req.body;
+
+  if (!itemId) {
+    return res.status(400).json({ success: false, message: "Item ID is required" });
+  }
+
+  try {
+    // Logic to add the item to the cart
+    // Example: Update the user's cart data in the database
+    // Use req.body.userId to identify the user and update their cart.
+
+    res.json({ success: true, message: "Item added to cart" });
+  } catch (error) {
+    console.error("Error adding to cart:", error);
+    res.status(500).json({ success: false, message: "Error adding to cart" });
+  }
+});
+
 
 // Start the Server
 app.listen(port, (error) => {
