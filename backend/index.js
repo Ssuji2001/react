@@ -43,7 +43,8 @@ const User = mongoose.model("User", {
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   cartData: {
-    type: Object,  // Object for storing product IDs as keys and quantities as values
+    type: Map,  // Map for storing keys as product IDs and values as quantities
+    of: Number, // The value type is Number (for product quantities)
     default: () => {
       const cart = {};
       for (let i = 0; i < 300; i++) {
@@ -54,7 +55,6 @@ const User = mongoose.model("User", {
   },
   date: { type: Date, default: Date.now },
 });
-
 
 
 // Product Schema and Model
@@ -184,53 +184,6 @@ app.post("/login", async (req, res) => {
     res.status(500).json({ success: false, message: "Login failed.", error });
   }
 });
-// Add to Cart Endpoint
-app.post("/addtocart", async (req, res) => {
-  const { itemId } = req.body;
-  const authToken = req.headers['auth-token'];  // Assuming token-based authentication
-
-  if (!itemId) {
-    return res.status(400).json({ success: false, message: "Item ID is required" });
-  }
-
-  if (!authToken) {
-    return res.status(401).json({ success: false, message: "Authentication token is required" });
-  }
-
-  try {
-    // Find the user by the auth-token
-    const user = await User.findOne({ authToken });
-
-    if (!user) {
-      return res.status(401).json({ success: false, message: "User not found or not authenticated" });
-    }
-
-    // Find the user's cart (or create one if it doesn't exist)
-    const cart = user.cart || [];
-
-    // Check if the item already exists in the cart
-    const itemIndex = cart.findIndex(item => item.itemId === itemId);
-
-    if (itemIndex !== -1) {
-      // If the item already exists in the cart, increment its quantity
-      cart[itemIndex].quantity += 1;
-    } else {
-      // Otherwise, add the new item to the cart
-      cart.push({ itemId, quantity: 1 });
-    }
-
-    // Save the updated cart in the database
-    user.cart = cart;
-    await user.save();
-
-    // Return a success message
-    res.json({ success: true, message: "Item added to cart", cart });
-  } catch (error) {
-    console.error("Error adding to cart:", error);
-    res.status(500).json({ success: false, message: "Error adding to cart" });
-  }
-});
-
 
 // Start the Server
 app.listen(port, (error) => {
