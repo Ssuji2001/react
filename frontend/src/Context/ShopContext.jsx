@@ -46,19 +46,23 @@ const ShopContextProvider = (props) => {
             fetch('https://react-zfr1.onrender.com/addtocart', {
                 method: 'POST',
                 headers: {
-                    Accept: 'application/json',
-                    'auth-token': localStorage.getItem('auth-token'),
-                    'Content-Type': 'application/json',
+                  'Accept': 'application/json',
+                  'auth-token': localStorage.getItem('auth-token'),
+                  'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ itemId }),
-            })
-                .then((response) => response.text())  // Assuming backend sends plain text
-                .then((data) => console.log(data))  // Log response from backend
-                .catch((error) => console.error('Error adding to cart:', error));  // Handle errors
-        } else {
-            console.warn('User is not authenticated');
-        }
+              })
+                .then((response) => {
+                  if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                  }
+                  return response.json();
+                })
+                .then((data) => console.log(data))
+                .catch((error) => console.error('Error adding to cart:', error));
+              
     };
+}
 
     // Remove one item from the cart (by itemId)
     const removeFromCart = (itemId) => {
