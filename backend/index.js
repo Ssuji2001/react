@@ -43,11 +43,19 @@ const User = mongoose.model("User", {
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   cartData: {
-    type: Object, // Change the type to Number
-     
+    type: Map,  // Map for storing keys as product IDs and values as quantities
+    of: Number, // The value type is Number (for product quantities)
+    default: () => {
+      const cart = {};
+      for (let i = 0; i < 300; i++) {
+        cart[i] = 0;  // Set initial quantity to 0 for each product ID
+      }
+      return cart;
+    }
   },
-  date: { type: Date, default: Date.now }, // Automatically store the creation date
+  date: { type: Date, default: Date.now },
 });
+
 
 // Product Schema and Model
 const Product = mongoose.model("Product", {
