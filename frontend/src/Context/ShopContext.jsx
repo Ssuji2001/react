@@ -17,25 +17,21 @@ const ShopContextProvider = (props) => {
 
     // Fetch products and cart data on component mount
     useEffect(() => {
-        fetch('https://react-zfr1.onrender.com/allproducts')
-            .then((response) => response.json())
-            .then((data) => setAll_Product(data));
-
-        // Fetch cart data only if user is authenticated
-        if (localStorage.getItem('auth-token')) {
-            fetch('https://react-zfr1.onrender.com/getcart', {
-                method: 'POST',
-                headers: {
-                    Accept: 'application/json',  // Fixed typo here
-                    'auth-token': `${localStorage.getItem('auth-token')}`,
-                    'Content-Type': 'application/json',  // Fixed typo here
-                },
-                body: JSON.stringify({}),  // Empty body or adjust it as needed for your backend
-            })
-            .then((response) => response.json())
-            .then((data) => setCartItems(data))
-            .catch((error) => console.error('Error fetching cart:', error));  // Added error handling for getcart
-        }
+        fetch('https://react-zfr1.onrender.com/getcart', {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'auth-token': `${localStorage.getItem('auth-token')}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({}),
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            setCartItems(data); // Ensure this matches the expected structure from the backend
+        })
+        .catch((error) => console.error('Error fetching cart:', error)); 
+        
     }, []);
 
    const addToCart = (itemId) => {
