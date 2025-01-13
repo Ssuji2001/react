@@ -208,19 +208,16 @@ const fetchUser = async (req, res, next) => {
   }
 
   try {
-    const data = jwt.verify(token, 'secret_ecom'); // Ensure the same secret key as when signing the token
+    // Verify the token and attach user data to the request
+    const data = jwt.verify(token, 'secret_ecom');
     req.user = data.user;
-    next();
+    next(); // Proceed to the next middleware or route handler
   } catch (error) {
     console.error("Token verification error:", error.message);
     res.status(401).send({ errors: "Invalid authentication token. Please login again." });
   }
 };
 
-app.post('/getcart', fetchUser, async (req, res) => {
-  let userData = await User.findOne({_id: req.user.id});  // Ensure correct reference to "User" model
-  res.json(userData.cartData);  // Ensure that cart data is returned in a format that matches your frontend
-});
 
 //creating endpoint for adding products in cartdata
 app.post('/addtocart', fetchUser, async (req, res) => {
@@ -232,7 +229,7 @@ app.post('/addtocart', fetchUser, async (req, res) => {
     }
 
     // Fetch user data
-    const userData = await User.findOne({ _id: req.user.id });
+    const userData = await Users.findOne({ _id: req.user.id });
     if (!userData) {
       return res.status(404).send({ error: "User not found" });
     }
@@ -267,7 +264,7 @@ app.post('/removefromcart', fetchUser, async (req, res) => {
     }
 
     // Fetch user data
-    const userData = await User.findOne({ _id: req.user.id });
+    const userData = await Users.findOne({ _id: req.user.id });
     if (!userData) {
       return res.status(404).send({ error: "User not found" });
     }
@@ -323,6 +320,12 @@ app.post('/removeonefromcart', fetchUser, async (req, res) => {
     res.status(500).send({ error: "Internal server error" });
   }
 });  
+//creating endpoint for get products in cartdata
+app.post('/getcart', fetchUser, async (req, res) => {
+  console.log("Getcart");
+  let userData = await Users.findOne({_id:req.user.id});
+  res.json(userData.cartData);
+});
 
 
 
