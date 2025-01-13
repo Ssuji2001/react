@@ -42,7 +42,7 @@ const ShopContextProvider = (props) => {
         setCartItems((prev) => ({ ...prev, [itemId]: (prev[itemId] || 0) + 1 }));
 
         if (localStorage.getItem('auth-token')) {
-            fetch('http://localhost:3000/addtocart', {
+            fetch('https://react-zfr1.onrender.com/addtocart', {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',
@@ -64,7 +64,7 @@ const ShopContextProvider = (props) => {
         setCartItems((prev) => ({ ...prev, [itemId]: (prev[itemId] || 0) - 1 }));
 
         if (localStorage.getItem('auth-token')) {
-            fetch('http://localhost:3000/removefromcart', {
+            fetch('https://react-zfr1.onrender.com/removefromcart', {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',
@@ -84,7 +84,7 @@ const ShopContextProvider = (props) => {
         setCartItems((prev) => ({ ...prev, [itemId]: (prev[itemId] || 0) - 1 }));
 
         if (localStorage.getItem('auth-token')) {
-            fetch('http://localhost:3000/removefromcart', {
+            fetch('https://react-zfr1.onrender.com/removefromcart', {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',
