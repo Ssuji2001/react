@@ -30,7 +30,7 @@ const AddProduct = () => {
         formData.append('product',image);
 
 
-        await fetch('https://react-6jql.vercel.app/upload',{
+        await fetch('https://react-zfr1.onrender.com/upload',{
             method:'POST',
             headers:{
                 Accept:'application/json',
@@ -42,7 +42,7 @@ const AddProduct = () => {
         {
             product.image = responseData.image_url;
             console.log(product);
-            await fetch("https://react-6jql.vercel.app/addproduct",{
+            await fetch("https://react-zfr1.onrender.com/addproduct",{
                 method:'POST',
                 headers:{
                     Accept:'application/json',

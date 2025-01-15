@@ -7,7 +7,7 @@ const ListProduct = () => {
     const[allproducts,setAllProducts] =  useState([]);
 
     const fetchInfo = async ()=>{
-      await fetch("https://react-6jql.vercel.app/allproducts")
+      await fetch("https://react-zfr1.onrender.com/allproducts")
       .then((res)=>res.json())
       .then((data)=>{setAllProducts(data)});
     }
@@ -17,7 +17,7 @@ const ListProduct = () => {
     },[])
 
     const remove_product = async (id)=>{
-      await fetch('https://react-6jql.vercel.app/removeproduct',{
+      await fetch('https://react-zfr1.onrender.com/removeproduct',{
         method:'POST',
         headers:{
           Accept:'application/json',
