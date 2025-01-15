@@ -46,7 +46,8 @@ app.get("/", (req, res) => {
 const storage = multer.diskStorage({
   destination: "./upload/images",
   filename: (req, file, cb) => {
-    return cb(null, $`{file.fieldname}_${Date.now()}${path.extname(file.originalname)}`);
+    return cb(null, `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`);
+
   },
 });
 
@@ -57,7 +58,8 @@ app.use("/images", express.static(path.join("upload/images")));
 
 // Upload Endpoint for Images
 app.post("/upload", upload.single("product"), (req, res) => {
-  const imageUrl = $`{req.protocol}://${req.get("host")}/images/${req.file.filename}`;
+  const imageUrl = `${req.protocol}://${req.get("host")}/images/${req.file.filename}`;
+
   res.json({
     success: 1,
     image_url: imageUrl,
@@ -108,7 +110,8 @@ app.get("/allproducts", async (req, res) => {
   let products = await Product.find({});
   products = products.map((product) => ({
     ...product.toObject(),
-    image: product.image.startsWith("http") ? product.image : $`{BASE_URL}${product.image}`,
+    image: product.image.startsWith("http") ? product.image : `${BASE_URL}${product.image}`,
+
   }));
   res.json(products);
 });
