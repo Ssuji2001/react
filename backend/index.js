@@ -1,4 +1,4 @@
-const port = 4000;
+const port = 3000;
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
@@ -22,7 +22,7 @@ app.use(
 const dotenv = require("dotenv");
 dotenv.config();
 
-console.log("MONGO_URI:", process.env.MONGO_URI);
+console.log("MONGO_URL:", process.env.MONGO_URI);
 
 const connectDB = async () => {
   try {
@@ -38,6 +38,37 @@ const connectDB = async () => {
 
 connectDB();
 
+const User = mongoose.model("User", {
+  username: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  cartData: {
+    type: Map,  // Map for storing keys as product IDs and values as quantities
+    of: Number, // The value type is Number (for product quantities)
+    default: () => {
+      const cart = {};
+      for (let i = 0; i < 300; i++) {
+        cart[i] = 0;  // Set initial quantity to 0 for each product ID
+      }
+      return cart;
+    }
+  },
+  date: { type: Date, default: Date.now },
+});
+
+
+// Product Schema and Model
+const Product = mongoose.model("Product", {
+  id: { type: Number, required: true },
+  name: { type: String, required: true },
+  image: { type: String, required: true },
+  category: { type: String, required: true },
+  new_price: { type: Number, required: true },
+  old_price: { type: Number, required: true },
+  date: { type: Date, default: Date.now },
+  available: { type: Boolean, default: true },
+});
+
 app.get("/", (req, res) => {
   res.send("Express App is Running");
 });
@@ -46,8 +77,10 @@ app.get("/", (req, res) => {
 const storage = multer.diskStorage({
   destination: "./upload/images",
   filename: (req, file, cb) => {
-    return cb(null, `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`);
-
+    return cb(
+      null,
+      `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`
+    );
   },
 });
 
@@ -59,23 +92,10 @@ app.use("/images", express.static(path.join("upload/images")));
 // Upload Endpoint for Images
 app.post("/upload", upload.single("product"), (req, res) => {
   const imageUrl = `${req.protocol}://${req.get("host")}/images/${req.file.filename}`;
-
   res.json({
     success: 1,
     image_url: imageUrl,
   });
-});
-
-// Product Schema
-const Product = mongoose.model("Product", {
-  id: { type: Number, required: true },
-  name: { type: String, required: true },
-  image: { type: String, required: true },
-  category: { type: String, required: true },
-  new_price: { type: Number, required: true },
-  old_price: { type: Number, required: true },
-  date: { type: Date, default: Date.now },
-  available: { type: Boolean, default: true },
 });
 
 // Add Product
@@ -111,13 +131,74 @@ app.get("/allproducts", async (req, res) => {
   products = products.map((product) => ({
     ...product.toObject(),
     image: product.image.startsWith("http") ? product.image : `${BASE_URL}${product.image}`,
-
   }));
   res.json(products);
 });
 
-// The rest of your code for Users and other endpoints remains unchanged...
+// Signup Endpoint
+app.post("/signup", async (req, res) => {
+  const { username, email, password } = req.body;
 
+  if (!username || !email || !password) {
+    return res.status(400).json({ success: false, message: "All fields are required" });
+  }
+
+  try {
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: "Email is already registered" });
+    }
+
+    const user = new User({ username, email, password });
+    await user.save();
+    console.log("User registered:", { username, email });
+    res.json({ success: true, message: "Signup successful!" });
+  } catch (error) {
+    console.error("Signup error:", error.message);
+    res.status(500).json({ success: false, message: "Signup failed.", error });
+  }
+});
+let cart = {};
+for (let i = 0; i < 300; i++) {
+  cart[i] = 0;
+}
+
+// Login Endpoint
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ success: false, message: "Email and password are required" });
+  }
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user || user.password !== password) {
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
+    }
+
+    const token = jwt.sign({ email: user.email }, "your_jwt_secret", { expiresIn: "1h" });
+    res.json({ success: true, message: "Login successful!", token });
+  } catch (error) {
+    console.error("Login error:", error.message);
+    res.status(500).json({ success: false, message: "Login failed.", error });
+  }
+});
+app.post('/addtocart', async (req, res) => {
+  const { itemId } = req.body;
+
+  if (!itemId) {
+    return res.status(400).json({ success: false, message: "Item ID is required" });
+  }
+  try {
+    // Logic to add the item to the cart
+    res.json({ success: true, message: "Item added to cart" });
+  } catch (error) {
+    console.error('Error adding to cart:', error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+});
+// Start the Server
 app.listen(port, (error) => {
   if (!error) {
     console.log("Server Running on Port " + port);
