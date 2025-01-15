@@ -12,7 +12,7 @@ app.use(express.json());
 // Replace with your frontend URL
 app.use(
   cors({
-    origin: "https://react-chi-ashy.vercel.app",
+    origin: "*",
     methods: ["POST", "GET"],
     credentials: true,
   })
