@@ -22,11 +22,11 @@ app.use(
 const dotenv = require("dotenv");
 dotenv.config();
 
-console.log("MONGO_URL:", process.env.MONGO_URL);
+console.log("MONGO_URI:", process.env.MONGO_URI);
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URL, {
+    await mongoose.connect(process.env.MONGO_URI, {
       useUnifiedTopology: true,
     });
     console.log("Connected to MongoDB successfully!");
