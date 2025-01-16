@@ -39,7 +39,7 @@ app.get("/", (req, res) => {
 });
 
 // Static Files for Images
-app.use("/images", express.static(path.join(__dirname, "upload/images")));
+app.use("/images", express.static(path.join("upload/images")));
 
 // Multer Storage Configuration
 const storage = multer.diskStorage({
