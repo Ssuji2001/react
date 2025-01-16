@@ -44,17 +44,21 @@ app.get("/", (req, res) => {
 
 // Image Storage Engine
 const storage = multer.diskStorage({
-  destination: "./upload/images",
+  destination: (req, file, cb) => {
+    const uploadPath = './upload/images';
+    fs.mkdirSync(uploadPath, { recursive: true });  // Ensure the directory exists
+    cb(null, uploadPath);
+  },
   filename: (req, file, cb) => {
     return cb(null, `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`);
-
   },
 });
 
 const upload = multer({ storage: storage });
 
 // Serving Static Images
-app.use("/images", express.static(path.join("upload/images")));
+app.use("/images", express.static(path.join(__dirname, "upload/images")));
+
 
 // Upload Endpoint for Images
 app.post("/upload", upload.single("product"), (req, res) => {
@@ -111,8 +115,8 @@ app.get("/allproducts", async (req, res) => {
   products = products.map((product) => ({
     ...product.toObject(),
     image: product.image.startsWith("http") ? product.image : `${BASE_URL}${product.image}`,
-
   }));
+  
   res.json(products);
 });
 
