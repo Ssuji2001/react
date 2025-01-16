@@ -105,6 +105,17 @@ app.post("/removeproduct", async (req, res) => {
   res.json({ success: true });
 });
 
+//Get All Products
+app.get("/allproducts", async (req, res) => {
+  let products = await Product.find({});
+  products = products.map((product) => ({
+    ...product.toObject(),
+    image: product.image.startsWith("http") ? product.image : ${BASE_URL}${product.image},
+  }));
+  res.json(products);
+});
+
+
 // JWT Middleware
 const fetchUser = (req, res, next) => {
   const token = req.header("auth-token");
