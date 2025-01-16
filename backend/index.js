@@ -107,12 +107,13 @@ app.post("/removeproduct", async (req, res) => {
 
 //Get All Products
 app.get("/allproducts", async (req, res) => {
-  let products = await Product.find({});
-  products = products.map((product) => ({
-    ...product.toObject(),
-    image: product.image.startsWith("http") ? product.image : $`{BASE_URL}${product.image}`,
-  }));
-  res.json(products);
+
+    let products = await Product.find({});
+    products = products.map((product) => ({
+      ...product.toObject(),
+      image: product.image.startsWith("http") ? product.image : `${BASE_URL}${product.image}`,
+    }));
+    res.json(products);
 });
 
 
