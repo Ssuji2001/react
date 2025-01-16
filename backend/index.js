@@ -16,8 +16,8 @@ app.use(express.json());
 // CORS Configuration
 app.use(
   cors({
-    origin: "https://react-chi-ashy.vercel.app", // Replace with your frontend's URL
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    origin: "*", // Replace with your frontend's URL
+    methods: ["GET", "POST"],
     credentials: true,
   })
 );
