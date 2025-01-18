@@ -16,7 +16,7 @@ app.use(express.json());
 // CORS Configuration
 app.use(
   cors({
-    origin: "*", // Replace with your frontend's URL
+    origin: "*", // Replace with your frontend's URL if needed
     methods: ["GET", "POST"],
     credentials: true,
   })
@@ -25,7 +25,7 @@ app.use(
 // MongoDB Connection
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI, { useUnifiedTopology: true });
+    await mongoose.connect(process.env.MONGO_URI, { useUnifiedTopology: true, useNewUrlParser: true });
     console.log("Connected to MongoDB successfully!");
   } catch (error) {
     console.error("Error connecting to MongoDB:", error.message);
@@ -34,6 +34,7 @@ const connectDB = async () => {
 };
 connectDB();
 
+// Basic Route
 app.get("/", (req, res) => {
   res.send("Express App is Running");
 });
@@ -77,6 +78,10 @@ const Users = mongoose.model("Users", {
 
 // Upload Image Endpoint
 app.post("/upload", upload.single("product"), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: "No file uploaded or incorrect field name" });
+  }
+
   const imageUrl = `${req.protocol}://${req.get("host")}/images/${req.file.filename}`;
   res.json({ success: 1, image_url: imageUrl });
 });
@@ -105,17 +110,16 @@ app.post("/removeproduct", async (req, res) => {
   res.json({ success: true });
 });
 
-//Get All Products
+// Get All Products
 app.get("/allproducts", async (req, res) => {
-
-    let products = await Product.find({});
-    products = products.map((product) => ({
-      ...product.toObject(),
-      image: product.image.startsWith("http") ? product.image : `${BASE_URL}${product.image}`,
-    }));
-    res.json(products);
+  const products = await Product.find({});
+  const BASE_URL = `${req.protocol}://${req.get("host")}/images/`;
+  const updatedProducts = products.map((product) => ({
+    ...product.toObject(),
+    image: product.image.startsWith("http") ? product.image : `${BASE_URL}${product.image}`,
+  }));
+  res.json(updatedProducts);
 });
-
 
 // JWT Middleware
 const fetchUser = (req, res, next) => {
@@ -149,21 +153,23 @@ app.post("/getcart", fetchUser, async (req, res) => {
   const user = await Users.findById(req.user.id);
   res.json(user.cartData);
 });
-//creating endpoint for newcollection data
-app.get('/newcollections',async (req,res)=>{
-  let products = await Product.find({});
-  let newcollection = products.slice(1).slice(-8);
-  console.log("NewCollection Fetched");
-  res.send(newcollection);
-})
 
-//cretaing endpoint for popular in women section
-app.get('/popularinwomen',async(req,res)=>{
-  let products = await Product.find({category:"women"});
-  let popular_in_women = products.slice(0,4);
-  console.log("Popular in women fetched");
-  res.send(popular_in_women);
-})
+// Create Endpoint for New Collection
+app.get("/newcollections", async (req, res) => {
+  const products = await Product.find({});
+  const newCollection = products.slice(1).slice(-8);
+  console.log("New Collection Fetched");
+  res.send(newCollection);
+});
+
+// Create Endpoint for Popular in Women Section
+app.get("/popularinwomen", async (req, res) => {
+  const products = await Product.find({ category: "women" });
+  const popularInWomen = products.slice(0, 4);
+  console.log("Popular in Women Fetched");
+  res.send(popularInWomen);
+});
+
 // Start Server
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
