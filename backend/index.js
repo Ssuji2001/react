@@ -16,7 +16,7 @@ app.use(express.json());
 // CORS Configuration
 app.use(
   cors({
-    origin: "*", // Replace with your frontend's URL
+    origin: "*", // Replace with your frontend's URL if needed
     methods: ["GET", "POST"],
     credentials: true,
   })
@@ -39,7 +39,7 @@ app.get("/", (req, res) => {
 });
 
 // Static Files for Images
-app.use("/images", express.static(path.join("upload/images")));
+app.use("/images", express.static(path.join(__dirname, "upload/images")));
 
 // Multer Storage Configuration
 const storage = multer.diskStorage({
@@ -53,6 +53,12 @@ const storage = multer.diskStorage({
   },
 });
 const upload = multer({ storage });
+
+// Define BASE_URL dynamically
+app.use((req, res, next) => {
+  req.BASE_URL = `${req.protocol}://${req.get("host")}/images/`;
+  next();
+});
 
 // Product Schema
 const Product = mongoose.model("Product", {
@@ -77,7 +83,7 @@ const Users = mongoose.model("Users", {
 
 // Upload Image Endpoint
 app.post("/upload", upload.single("product"), (req, res) => {
-  const imageUrl = `${req.protocol}://${req.get("host")}/images/${req.file.filename}`;
+  const imageUrl = `${req.BASE_URL}${req.file.filename}`;
   res.json({ success: 1, image_url: imageUrl });
 });
 
@@ -105,66 +111,18 @@ app.post("/removeproduct", async (req, res) => {
   res.json({ success: true });
 });
 
-//Get All Products
+// Get All Products
 app.get("/allproducts", async (req, res) => {
-
-    let products = await Product.find({});
-    products = products.map((product) => ({
-      ...product.toObject(),
-      image: product.image.startsWith("http") ? product.image : `${BASE_URL}${product.image}`,
-    }));
-    res.json(products);
-});
-
-
-// JWT Middleware
-const fetchUser = (req, res, next) => {
-  const token = req.header("auth-token");
-  if (!token) return res.status(401).send({ error: "Missing auth token" });
-
-  try {
-    const data = jwt.verify(token, "secret_ecom");
-    req.user = data.user;
-    next();
-  } catch {
-    res.status(401).send({ error: "Invalid token" });
-  }
-};
-
-// Add to Cart
-app.post("/addtocart", fetchUser, async (req, res) => {
-  const { itemId } = req.body;
-  if (!itemId) return res.status(400).send({ error: "Item ID required" });
-
-  const user = await Users.findById(req.user.id);
-  user.cartData[itemId] = (user.cartData[itemId] || 0) + 1;
-  user.markModified("cartData");
-  await user.save();
-
-  res.send("Added");
-});
-
-// Get Cart
-app.post("/getcart", fetchUser, async (req, res) => {
-  const user = await Users.findById(req.user.id);
-  res.json(user.cartData);
-});
-//creating endpoint for newcollection data
-app.get('/newcollections',async (req,res)=>{
   let products = await Product.find({});
-  let newcollection = products.slice(1).slice(-8);
-  console.log("NewCollection Fetched");
-  res.send(newcollection);
-})
+  const BASE_URL = req.BASE_URL;
+  products = products.map((product) => ({
+    ...product.toObject(),
+    image: product.image.startsWith("http") ? product.image : `${BASE_URL}${product.image}`,
+  }));
+  res.json(products);
+});
 
-//cretaing endpoint for popular in women section
-app.get('/popularinwomen',async(req,res)=>{
-  let products = await Product.find({category:"women"});
-  let popular_in_women = products.slice(0,4);
-  console.log("Popular in women fetched");
-  res.send(popular_in_women);
-})
-// Start Server
+// Other Endpoints
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
