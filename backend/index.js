@@ -9,7 +9,7 @@ const fs = require("fs");
 
 dotenv.config();
 const app = express();
-const port = 3000;
+const port = 4000;
 
 app.use(express.json());
 
@@ -20,7 +20,9 @@ app.use(
     methods: ["GET", "POST"],
     credentials: true,
   })
-);
+); 
+
+
 
 // MongoDB Connection
 const connectDB = async () => {
@@ -38,21 +40,27 @@ app.get("/", (req, res) => {
   res.send("Express App is Running");
 });
 
-// Static Files for Images
+//Imge storage engine
+const storage =multer.diskStorage({
+  destination:"./upload/images",
+  filename:(req,file,cb)=>{
+    return cb(null, `${file.fieldname}_${Date.now()}${path.extreme(file.originalname)}`)
+  },
+
+});
+const upload = multer({storage:storage});
+
+//serving static images
 app.use("/images", express.static(path.join("upload/images")));
 
-// Multer Storage Configuration
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadPath = "./upload/images";
-    fs.mkdirSync(uploadPath, { recursive: true });
-    cb(null, uploadPath);
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`);
-  },
+// Upload endpoint for images
+app.post("/upload", upload.single("product"), (req, res) => {
+  const imageUrl = `${req.protocol}://${req.get("host")}/images/${req.file.filename}`;
+  res.json({
+    success: 1,
+    image_url: imageUrl,
+  });
 });
-const upload = multer({ storage });
 
 // Product Schema
 const Product = mongoose.model("Product", {
@@ -75,11 +83,7 @@ const Users = mongoose.model("Users", {
   date: { type: Date, default: Date.now },
 });
 
-// Upload Image Endpoint
-app.post("/upload", upload.single("product"), (req, res) => {
-  const imageUrl = `${req.protocol}://${req.get("host")}/images/${req.file.filename}`;
-  res.json({ success: 1, image_url: imageUrl });
-});
+
 
 // Add Product
 app.post("/addproduct", async (req, res) => {
