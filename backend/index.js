@@ -9,7 +9,7 @@ const fs = require("fs");
 
 dotenv.config();
 const app = express();
-const port = 4000;
+const port = 5000;
 
 app.use(express.json());
 
@@ -55,12 +55,14 @@ app.use("/images", express.static(path.join("upload/images")));
 
 // Upload endpoint for images
 app.post("/upload", upload.single("product"), (req, res) => {
-  const imageUrl = `${req.protocol}://${req.get("host")}/images/${req.file.filename}`;
+  console.log("File field name:", req.file.fieldname); // Debugging
+  console.log("Body:", req.body); // Optional
   res.json({
     success: 1,
-    image_url: imageUrl,
+    image_url: `${req.protocol}://${req.get("host")}/images/${req.file.filename}`,
   });
 });
+
 
 // Product Schema
 const Product = mongoose.model("Product", {
