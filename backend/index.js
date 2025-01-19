@@ -72,28 +72,38 @@ const Product = mongoose.model("Product", {
 app.get("/", (req, res) => {
   res.send("Express App is Running");
 });
+// Ensure the upload directory exists
+const uploadDir = path.resolve(__dirname, './upload/images');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 
 // Image Storage Engine
 const storage = multer.diskStorage({
-  destination: './upload/images',
+  destination: uploadDir,
   filename: (req, file, cb) => {
-    return cb(
+    cb(
       null,
       `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`
     );
   },
 });
- const upload = multer({storage:storage})
-  //creating upload endpoint for images
-app.use('/images',express.static('upload/images'))
 
-  app.post("/upload",upload.single('product'),(req,res)=>{
-res.json({
-  success:1,
-  image_url:`http://localhost:${port}/images/${req.file.filename}`
+const upload = multer({ storage: storage });
 
-})
-  })
+// Static middleware to serve uploaded images
+app.use('/images', express.static(uploadDir));
+
+// Endpoint for uploading images
+app.post('/upload', upload.single('product'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ success: 0, message: 'No file uploaded' });
+  }
+  res.json({
+    success: 1,
+    image_url: `http://localhost:${port}/images/${req.file.filename}`,
+  });
+});
 
 // Add Product
 app.post("/addproduct", async (req, res) => {
