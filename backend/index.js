@@ -1,74 +1,55 @@
+const port = 3000;
 const express = require("express");
+const app = express();
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const path = require("path");
 const cors = require("cors");
-const dotenv = require("dotenv");
-const fs = require("fs");
-
-dotenv.config();
-const app = express();
-const port = 3000;
 
 app.use(express.json());
 
-// CORS Configuration
+// Replace with your frontend URL
 app.use(
   cors({
-    origin: "*", // Replace with your frontend's URL
-    methods: ["GET", "POST"],
+    origin: "*",
+    methods: ["POST", "GET"],
     credentials: true,
   })
-); 
+);
 
+// Database Connection with MongoDB
+const dotenv = require("dotenv");
+dotenv.config();
 
+console.log("MONGO_URL:", process.env.MONGO_URI);
 
-// MongoDB Connection
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI, { useUnifiedTopology: true });
+    await mongoose.connect(process.env.MONGO_URI, {
+      useUnifiedTopology: true,
+    });
     console.log("Connected to MongoDB successfully!");
   } catch (error) {
     console.error("Error connecting to MongoDB:", error.message);
     process.exit(1);
   }
 };
+
 connectDB();
 
-app.get("/", (req, res) => {
-  res.send("Express App is Running");
-});
-
-const uploadDir = "./upload/images";
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-// Image storage engine
-const storage = multer.diskStorage({
-  destination: uploadDir,
-  filename: (req, file, cb) => {
-    return cb(null, `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`);
+const User = mongoose.model("User", {
+  username: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  cartData: {
+    type: Number, // Change the type to Number
+    default: 300, // Default value set to 300
   },
+  date: { type: Date, default: Date.now }, // Automatically store the creation date
 });
 
-const upload = multer({ storage: storage });
-
-// Serving static images
-app.use("/images", express.static(path.join(__dirname, "upload/images")));
-
-// Upload endpoint for images
-app.post("/upload", upload.single("product"), (req, res) => {
-  console.log("File field name:", req.file.fieldname); // Debugging
-  console.log("Body:", req.body); // Optional
-  res.json({
-    success: 1,
-    image_url: `${req.protocol}://${req.get("host")}/images/${req.file.filename}`,
-  });
-});
-
-// Product Schema
+// Product Schema and Model
 const Product = mongoose.model("Product", {
   id: { type: Number, required: true },
   name: { type: String, required: true },
@@ -80,24 +61,42 @@ const Product = mongoose.model("Product", {
   available: { type: Boolean, default: true },
 });
 
-// User Schema
-const Users = mongoose.model("Users", {
-  name: { type: String },
-  email: { type: String, unique: true },
-  password: { type: String },
-  cartData: { type: Object },
-  date: { type: Date, default: Date.now },
+app.get("/", (req, res) => {
+  res.send("Express App is Running");
 });
 
+// Image Storage Engine
+const storage = multer.diskStorage({
+  destination: "./upload/images",
+  filename: (req, file, cb) => {
+    return cb(
+      null,
+      `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`
+    );
+  },
+});
 
+const upload = multer({ storage: storage });
+
+// Serving Static Images
+app.use("/images", express.static(path.join("upload/images")));
+
+// Upload Endpoint for Images
+app.post("/upload", upload.single("product"), (req, res) => {
+  const imageUrl = `${req.protocol}://${req.get("host")}/images/${req.file.filename}`;
+  res.json({
+    success: 1,
+    image_url: imageUrl,
+  });
+});
 
 // Add Product
 app.post("/addproduct", async (req, res) => {
-  const products = await Product.find({});
-  const id = products.length > 0 ? products.slice(-1)[0].id + 1 : 1;
+  let products = await Product.find({});
+  let id = products.length > 0 ? products.slice(-1)[0].id + 1 : 1;
 
   const product = new Product({
-    id,
+    id: id,
     name: req.body.name,
     image: req.body.image,
     category: req.body.category,
@@ -115,66 +114,70 @@ app.post("/removeproduct", async (req, res) => {
   res.json({ success: true });
 });
 
-//Get All Products
-app.get("/allproducts", async (req, res) => {
+// Base URL for Images
+const BASE_URL = "https://yourdomain.com"; // Replace with your actual domain
 
-    let products = await Product.find({});
-    products = products.map((product) => ({
-      ...product.toObject(),
-      image: product.image.startsWith("http") ? product.image : `${BASE_URL}${product.image}`,
-    }));
-    res.json(products);
+// Get All Products
+app.get("/allproducts", async (req, res) => {
+  let products = await Product.find({});
+  products = products.map((product) => ({
+    ...product.toObject(),
+    image: product.image.startsWith("http") ? product.image : `${BASE_URL}${product.image}`,
+  }));
+  res.json(products);
 });
 
+// Signup Endpoint
+app.post("/signup", async (req, res) => {
+  const { username, email, password } = req.body;
 
-// JWT Middleware
-const fetchUser = (req, res, next) => {
-  const token = req.header("auth-token");
-  if (!token) return res.status(401).send({ error: "Missing auth token" });
+  if (!username || !email || !password) {
+    return res.status(400).json({ success: false, message: "All fields are required" });
+  }
 
   try {
-    const data = jwt.verify(token, "secret_ecom");
-    req.user = data.user;
-    next();
-  } catch {
-    res.status(401).send({ error: "Invalid token" });
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: "Email is already registered" });
+    }
+
+    const user = new User({ username, email, password });
+    await user.save();
+    console.log("User registered:", { username, email });
+    res.json({ success: true, message: "Signup successful!" });
+  } catch (error) {
+    console.error("Signup error:", error.message);
+    res.status(500).json({ success: false, message: "Signup failed.", error });
   }
-};
-
-// Add to Cart
-app.post("/addtocart", fetchUser, async (req, res) => {
-  const { itemId } = req.body;
-  if (!itemId) return res.status(400).send({ error: "Item ID required" });
-
-  const user = await Users.findById(req.user.id);
-  user.cartData[itemId] = (user.cartData[itemId] || 0) + 1;
-  user.markModified("cartData");
-  await user.save();
-
-  res.send("Added");
 });
 
-// Get Cart
-app.post("/getcart", fetchUser, async (req, res) => {
-  const user = await Users.findById(req.user.id);
-  res.json(user.cartData);
-});
-//creating endpoint for newcollection data
-app.get('/newcollections',async (req,res)=>{
-  let products = await Product.find({});
-  let newcollection = products.slice(1).slice(-8);
-  console.log("NewCollection Fetched");
-  res.send(newcollection);
-})
+// Login Endpoint
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
 
-//cretaing endpoint for popular in women section
-app.get('/popularinwomen',async(req,res)=>{
-  let products = await Product.find({category:"women"});
-  let popular_in_women = products.slice(0,4);
-  console.log("Popular in women fetched");
-  res.send(popular_in_women);
-})
-// Start Server
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+  if (!email || !password) {
+    return res.status(400).json({ success: false, message: "Email and password are required" });
+  }
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user || user.password !== password) {
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
+    }
+
+    const token = jwt.sign({ email: user.email }, "your_jwt_secret", { expiresIn: "1h" });
+    res.json({ success: true, message: "Login successful!", token });
+  } catch (error) {
+    console.error("Login error:", error.message);
+    res.status(500).json({ success: false, message: "Login failed.", error });
+  }
+});
+
+// Start the Server
+app.listen(port, (error) => {
+  if (!error) {
+    console.log("Server Running on Port " + port);
+  } else {
+    console.log("Error : " + error);
+  }
 });
