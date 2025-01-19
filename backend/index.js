@@ -6,7 +6,7 @@ const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const path = require("path");
 const cors = require("cors");
-
+const fs = require("fs");
 app.use(express.json());
 
 // Replace with your frontend URL
@@ -78,24 +78,26 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// Image Storage Engine
+
+
+// Multer Storage Configuration
 const storage = multer.diskStorage({
   destination: uploadDir,
   filename: (req, file, cb) => {
-    cb(
-      null,
-      `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`
-    );
+    cb(null, `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`);
   },
 });
-
 const upload = multer({ storage: storage });
 
-// Static middleware to serve uploaded images
+// Serve Uploaded Images
 app.use('/images', express.static(uploadDir));
 
-// Endpoint for uploading images
-app.post('/upload', upload.single('product'), (req, res) => {
+// Test Endpoint
+app.get("/", (req, res) => {
+  res.send("Express App is Running");
+});
+
+app.post('/upload', upload.single('product'), (req, res) => {  // Changed field name to 'image'
   if (!req.file) {
     return res.status(400).json({ success: 0, message: 'No file uploaded' });
   }
@@ -104,6 +106,7 @@ app.post('/upload', upload.single('product'), (req, res) => {
     image_url: `http://localhost:${port}/images/${req.file.filename}`,
   });
 });
+
 
 // Add Product
 app.post("/addproduct", async (req, res) => {

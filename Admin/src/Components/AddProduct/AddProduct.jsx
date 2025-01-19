@@ -27,7 +27,8 @@ const AddProduct = () => {
         let product = productDetails;
 
         let formData = new FormData();
-        formData.append('product',image);
+        formData.append('product', image);  // Changed field name to 'image'
+        
 
 
         await fetch('https://react-zfr1.onrender.com/upload',{
