@@ -9,7 +9,7 @@ const fs = require("fs");
 
 dotenv.config();
 const app = express();
-const port = 5000;
+const port = 3000;
 
 app.use(express.json());
 
@@ -40,18 +40,23 @@ app.get("/", (req, res) => {
   res.send("Express App is Running");
 });
 
-//Imge storage engine
-const storage =multer.diskStorage({
-  destination:"./upload/images",
-  filename:(req,file,cb)=>{
-    return cb(null, `${file.fieldname}_${Date.now()}${path.extreme(file.originalname)}`)
+const uploadDir = "./upload/images";
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+// Image storage engine
+const storage = multer.diskStorage({
+  destination: uploadDir,
+  filename: (req, file, cb) => {
+    return cb(null, `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`);
   },
-
 });
-const upload = multer({storage:storage});
 
-//serving static images
-app.use("/images", express.static(path.join("upload/images")));
+const upload = multer({ storage: storage });
+
+// Serving static images
+app.use("/images", express.static(path.join(__dirname, "upload/images")));
 
 // Upload endpoint for images
 app.post("/upload", upload.single("product"), (req, res) => {
@@ -62,7 +67,6 @@ app.post("/upload", upload.single("product"), (req, res) => {
     image_url: `${req.protocol}://${req.get("host")}/images/${req.file.filename}`,
   });
 });
-
 
 // Product Schema
 const Product = mongoose.model("Product", {
