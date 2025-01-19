@@ -43,11 +43,19 @@ const User = mongoose.model("User", {
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   cartData: {
-    type: Number, // Change the type to Number
-    default: 300, // Default value set to 300
+    type: Object,  // Object for storing product IDs as keys and quantities as values
+    default: () => {
+      const cart = {};
+      for (let i = 0; i < 300; i++) {
+        cart[i] = 0;  // Set initial quantity to 0 for each product ID
+      }
+      return cart;
+    }
   },
-  date: { type: Date, default: Date.now }, // Automatically store the creation date
+  date: { type: Date, default: Date.now },
 });
+
+
 
 // Product Schema and Model
 const Product = mongoose.model("Product", {
@@ -150,6 +158,10 @@ app.post("/signup", async (req, res) => {
     res.status(500).json({ success: false, message: "Signup failed.", error });
   }
 });
+let cart = {};
+for (let i = 0; i < 300; i++) {
+  cart[i] = 0;
+}
 
 // Login Endpoint
 app.post("/login", async (req, res) => {
@@ -170,6 +182,22 @@ app.post("/login", async (req, res) => {
   } catch (error) {
     console.error("Login error:", error.message);
     res.status(500).json({ success: false, message: "Login failed.", error });
+  }
+});
+// Add to Cart Endpoint
+app.post("/addtocart", async (req, res) => {
+  const { itemId } = req.body;
+  if (!itemId) {
+    return res.status(400).json({ success: false, message: "Item ID is required" });
+  }
+  try {
+    // Logic to add the item to the cart
+    // Example: Update the user's cart data in the database
+    // Use req.body.userId to identify the user and update their cart.
+    res.json({ success: true, message: "Item added to cart" });
+  } catch (error) {
+    console.error("Error adding to cart:", error);
+    res.status(500).json({ success: false, message: "Error adding to cart" });
   }
 });
 
