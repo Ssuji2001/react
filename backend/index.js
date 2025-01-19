@@ -75,7 +75,7 @@ app.get("/", (req, res) => {
 
 // Image Storage Engine
 const storage = multer.diskStorage({
-  destination: "./upload/images",
+  destination: './upload/images',
   filename: (req, file, cb) => {
     return cb(
       null,
@@ -83,20 +83,17 @@ const storage = multer.diskStorage({
     );
   },
 });
+ const upload = multer({storage:storage})
+  //creating upload endpoint for images
+app.use('/images',express,static('upload/images'))
 
-const upload = multer({ storage: storage });
+  app.post("/upload",upload.single('product'),(req,res)=>{
+res.json({
+  success:1,
+  image_url:`http://localhost:${port}/images/${req.file.filename}`
 
-// Serving Static Images
-app.use("/images", express.static(path.join("upload/images")));
-
-// Upload Endpoint for Images
-app.post("/upload", upload.single("product"), (req, res) => {
-  const imageUrl = `${req.protocol}://${req.get("host")}/images/${req.file.filename}`;
-  res.json({
-    success: 1,
-    image_url: imageUrl,
-  });
-});
+})
+  })
 
 // Add Product
 app.post("/addproduct", async (req, res) => {
